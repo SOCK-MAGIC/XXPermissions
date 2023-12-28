@@ -5,10 +5,10 @@ import android.content.Context;
 import android.os.Build;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2022/01/22
- *    desc   : Android 版本判断
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/XXPermissions
+ * time   : 2022/01/22
+ * desc   : Android 版本判断
  */
 @SuppressLint("AnnotateVersionCheck")
 @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")

@@ -3,26 +3,28 @@ package com.hjq.permissions;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2021/02/09
- *    desc   : 权限错误检测类
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/XXPermissions
+ * time   : 2021/02/09
+ * desc   : 权限错误检测类
  */
 final class PermissionChecker {
 
     /**
      * 检查 Activity 的状态是否正常
      *
-     * @param checkMode         是否是检查模式
-     * @return                  是否检查通过
+     * @param checkMode 是否是检查模式
+     * @return 是否检查通过
      */
     static boolean checkActivityStatus(@Nullable Activity activity, boolean checkMode) {
         // 检查当前 Activity 状态是否是正常的，如果不是则不请求权限
@@ -60,9 +62,9 @@ final class PermissionChecker {
     /**
      * 检查传入的权限是否符合要求
      *
-     * @param requestPermissions        请求的权限组
-     * @param checkMode                 是否是检查模式
-     * @return                          是否检查通过
+     * @param requestPermissions 请求的权限组
+     * @param checkMode          是否是检查模式
+     * @return 是否检查通过
      */
     static boolean checkPermissionArgument(@Nullable List<String> requestPermissions, boolean checkMode) {
         if (requestPermissions == null || requestPermissions.isEmpty()) {
@@ -175,8 +177,8 @@ final class PermissionChecker {
 
         // 如果申请的是 Android 13 读取媒体权限，则绕过本次检查
         if (PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_IMAGES) ||
-            PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_VIDEO) ||
-            PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_AUDIO)) {
+                PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_VIDEO) ||
+                PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_AUDIO)) {
             return;
         }
 
@@ -434,19 +436,19 @@ final class PermissionChecker {
         }
 
         if (PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_IMAGES) ||
-            PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_VIDEO)) {
+                PermissionUtils.containsPermission(requestPermissions, Permission.READ_MEDIA_VIDEO)) {
             return;
         }
 
         // 不能单独请求 READ_MEDIA_VISUAL_USER_SELECTED 权限，需要加上 READ_MEDIA_IMAGES 或者 READ_MEDIA_VIDEO 任一权限，又或者两个都有，否则权限申请会被系统直接拒绝
         throw new IllegalArgumentException("You cannot request the " + Permission.READ_MEDIA_VISUAL_USER_SELECTED + " permission alone. "
-            + "must add either " + Permission.READ_MEDIA_IMAGES + " or " + Permission.READ_MEDIA_VIDEO + " permission, or maybe both");
+                + "must add either " + Permission.READ_MEDIA_IMAGES + " or " + Permission.READ_MEDIA_VIDEO + " permission, or maybe both");
     }
 
     /**
      * 检查 targetSdkVersion 是否符合要求
      *
-     * @param requestPermissions            请求的权限组
+     * @param requestPermissions 请求的权限组
      */
     static void checkTargetSdkVersion(@NonNull Context context, @NonNull List<String> requestPermissions) {
         for (String permission : requestPermissions) {
@@ -467,16 +469,16 @@ final class PermissionChecker {
             }
 
             throw new IllegalStateException("Request " + permission + " permission, " +
-                "The targetSdkVersion SDK must be " + targetSdkMinVersion +
-                " or more, if you do not want to upgrade targetSdkVersion, " +
-                "please apply with the old permission");
+                    "The targetSdkVersion SDK must be " + targetSdkMinVersion +
+                    " or more, if you do not want to upgrade targetSdkVersion, " +
+                    "please apply with the old permission");
         }
     }
 
     /**
      * 检查清单文件中所注册的权限是否正常
      *
-     * @param requestPermissions            请求的权限组
+     * @param requestPermissions 请求的权限组
      */
     static void checkManifestPermissions(@NonNull Context context, @NonNull List<String> requestPermissions,
                                          @Nullable AndroidManifestInfo androidManifestInfo) {
@@ -545,8 +547,8 @@ final class PermissionChecker {
             // Android 13
 
             if (PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_IMAGES) ||
-                PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_VIDEO) ||
-                PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_AUDIO)) {
+                    PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_VIDEO) ||
+                    PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_AUDIO)) {
                 checkManifestPermission(permissionInfoList, Permission.READ_EXTERNAL_STORAGE, AndroidVersion.ANDROID_12_L);
                 continue;
             }
@@ -599,9 +601,9 @@ final class PermissionChecker {
     /**
      * 检查某个权限注册是否正常，如果是则会抛出异常
      *
-     * @param permissionInfoList        清单权限组
-     * @param checkPermission           被检查的权限
-     * @param maxSdkVersion             最低要求的 maxSdkVersion
+     * @param permissionInfoList 清单权限组
+     * @param checkPermission    被检查的权限
+     * @param maxSdkVersion      最低要求的 maxSdkVersion
      */
     static void checkManifestPermission(@NonNull List<AndroidManifestInfo.PermissionInfo> permissionInfoList,
                                         String checkPermission, int maxSdkVersion) {
@@ -644,7 +646,7 @@ final class PermissionChecker {
     /**
      * 处理和优化已经过时的权限
      *
-     * @param requestPermissions            请求的权限组
+     * @param requestPermissions 请求的权限组
      */
     static void optimizeDeprecatedPermission(@NonNull List<String> requestPermissions) {
         // 如果本次申请包含了 Android 13 WIFI 权限

@@ -4,23 +4,39 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2022/01/17
- *    desc   : 权限页跳转 Fragment
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/XXPermissions
+ * time   : 2022/01/17
+ * desc   : 权限页跳转 Fragment
  */
 @SuppressWarnings("deprecation")
 public final class PermissionPageFragment extends Fragment implements Runnable {
 
-    /** 请求的权限组 */
+    /**
+     * 请求的权限组
+     */
     private static final String REQUEST_PERMISSIONS = "request_permissions";
+    /**
+     * 权限回调对象
+     */
+    @Nullable
+    private OnPermissionPageCallback mCallBack;
+    /**
+     * 权限申请标记
+     */
+    private boolean mRequestFlag;
+    /**
+     * 是否申请了权限
+     */
+    private boolean mStartActivityFlag;
 
     /**
      * 开启权限申请
@@ -40,16 +56,6 @@ public final class PermissionPageFragment extends Fragment implements Runnable {
         // 绑定到 Activity 上面
         fragment.attachActivity(activity);
     }
-
-    /** 权限回调对象 */
-    @Nullable
-    private OnPermissionPageCallback mCallBack;
-
-    /** 权限申请标记 */
-    private boolean mRequestFlag;
-
-    /** 是否申请了权限 */
-    private boolean mStartActivityFlag;
 
     /**
      * 绑定 Activity

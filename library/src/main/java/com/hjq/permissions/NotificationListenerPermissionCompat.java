@@ -4,18 +4,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2023/03/12
- *    desc   : 通知栏监听权限兼容类
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/XXPermissions
+ * time   : 2023/03/12
+ * desc   : 通知栏监听权限兼容类
  */
 final class NotificationListenerPermissionCompat {
 
-    /** Settings.Secure.ENABLED_NOTIFICATION_LISTENERS */
+    /**
+     * Settings.Secure.ENABLED_NOTIFICATION_LISTENERS
+     */
     private static final String SETTING_ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
     static boolean isGrantedPermission(@NonNull Context context) {
