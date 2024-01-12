@@ -29,7 +29,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.annotation)
 }
 tasks.withType<Javadoc>().configureEach {
     // prevent Javadoc from failing gradle build：https://stackoverflow.com/questions/35435173/prevent-javadoc-from-failing-gradle-build

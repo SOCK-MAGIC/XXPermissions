@@ -1,15 +1,15 @@
 [versions]
 androidGradlePlugin = "8.2.1"
-fragment = "1.6.2"
+annotation = "1.7.1"
 kotlin = "1.9.22"
 appcompat = "1.6.1"
 exifinterface = "1.3.7"
-leakcanary-android = "2.12"
+leakcanary-android = "2.13"
 toaster = "12.6"
 [libraries]
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
-androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary-android" }
 toaster = { group = "com.github.getActivity", name = "Toaster", version.ref = "toaster" }
 
