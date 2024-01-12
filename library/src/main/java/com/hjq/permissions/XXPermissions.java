@@ -1,7 +1,6 @@
 package com.hjq.permissions;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 
@@ -17,7 +16,7 @@ import java.util.List;
  * time   : 2018/06/15
  * desc   : Android 危险权限请求类
  */
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings({"unused"})
 public final class XXPermissions {
 
     /**
@@ -69,10 +68,6 @@ public final class XXPermissions {
      */
     public static XXPermissions with(@NonNull Context context) {
         return new XXPermissions(context);
-    }
-
-    public static XXPermissions with(@NonNull Fragment fragment) {
-        return with(fragment.getActivity());
     }
 
     /**
@@ -247,71 +242,6 @@ public final class XXPermissions {
         PermissionPageFragment.beginRequest(activity, (ArrayList<String>) permissions, callback);
     }
 
-    public static void startPermissionActivity(@NonNull Fragment fragment) {
-        startPermissionActivity(fragment, new ArrayList<>(0));
-    }
-
-    /* android.app.Activity */
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull String... permissions) {
-        startPermissionActivity(fragment, PermissionUtils.asArrayList(permissions));
-    }
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull String[]... permissions) {
-        startPermissionActivity(fragment, PermissionUtils.asArrayLists(permissions));
-    }
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull List<String> permissions) {
-        startPermissionActivity(fragment, permissions, REQUEST_CODE);
-    }
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull List<String> permissions,
-                                               int requestCode) {
-        Activity activity = fragment.getActivity();
-        if (activity == null) {
-            return;
-        }
-        if (permissions.isEmpty()) {
-            StartActivityManager.startActivity(fragment, PermissionIntentManager.getApplicationDetailsIntent(activity));
-            return;
-        }
-        Intent intent = PermissionUtils.getSmartPermissionIntent(activity, permissions);
-        StartActivityManager.startActivityForResult(fragment, intent, requestCode);
-    }
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull String permission,
-                                               @Nullable OnPermissionPageCallback callback) {
-        startPermissionActivity(fragment, PermissionUtils.asArrayList(permission), callback);
-    }
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull String[] permissions,
-                                               @Nullable OnPermissionPageCallback callback) {
-        startPermissionActivity(fragment, PermissionUtils.asArrayLists(permissions), callback);
-    }
-
-    public static void startPermissionActivity(@NonNull Fragment fragment,
-                                               @NonNull List<String> permissions,
-                                               @Nullable OnPermissionPageCallback callback) {
-        Activity activity = fragment.getActivity();
-        if (activity == null || activity.isFinishing()) {
-            return;
-        }
-        if (AndroidVersion.isAndroid4_2() && activity.isDestroyed()) {
-            return;
-        }
-        if (permissions.isEmpty()) {
-            StartActivityManager.startActivity(fragment, PermissionIntentManager.getApplicationDetailsIntent(activity));
-            return;
-        }
-        PermissionPageFragment.beginRequest(activity, (ArrayList<String>) permissions, callback);
-    }
-
     /**
      * 添加权限组
      */
@@ -325,8 +255,6 @@ public final class XXPermissions {
         mPermissions.add(permission);
         return this;
     }
-
-    /* android.app.Fragment */
 
     public XXPermissions permission(@Nullable String... permissions) {
         return permission(PermissionUtils.asArrayList(permissions));
