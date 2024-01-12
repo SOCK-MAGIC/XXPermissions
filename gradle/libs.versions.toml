@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.2.0"
+androidGradlePlugin = "8.2.1"
 fragment = "1.6.2"
 kotlin = "1.9.22"
 appcompat = "1.6.1"
