@@ -13,7 +13,6 @@ allprojects {
         localPropertiesFile.inputStream().use {
             properties.load(it)
         }
-
     }
 
     val buildDirPath = properties.getProperty("build.dir")
