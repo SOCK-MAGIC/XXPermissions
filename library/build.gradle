@@ -1,0 +1,73 @@
+plugins{
+    alias(libs.plugins.android.library)
+    id("maven-publish")
+}
+android {
+    compileSdk 34
+    namespace "com.hjq.permissions.library"
+    defaultConfig {
+        minSdkVersion 14
+        versionCode 1806
+        versionName "18.6"
+    }
+
+    // 使用 JDK 1.8
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    android.libraryVariants.configureEach { variant ->
+        // aar 输出文件名配置
+        variant.outputs.configureEach { output ->
+            outputFileName = "${rootProject.name}-${android.defaultConfig.versionName}.aar"
+        }
+    }
+
+    packagingOptions {
+        // 剔除这个包下的所有文件（不会移除签名信息）
+        exclude 'META-INF/*******'
+    }
+}
+
+afterEvaluate {
+    // R.class
+    generateReleaseResValues.enabled = false
+    generateDebugResValues.enabled = false
+}
+
+tasks.withType(Javadoc).configureEach {
+    // prevent Javadoc from failing gradle build：https://stackoverflow.com/questions/35435173/prevent-javadoc-from-failing-gradle-build
+    failOnError false
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+tasks.register('sourcesJar', Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier = 'sources'
+}
+
+tasks.register('javadoc', Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+dependencies {
+    implementation(libs.androidx.annotation)
+}

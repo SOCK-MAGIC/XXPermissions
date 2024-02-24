@@ -15,15 +15,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
-import android.view.Surface;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import org.xmlpull.v1.XmlPullParserException;
-
+import android.text.TextUtils;
+import android.view.Display;
+import android.view.Surface;
+import android.view.WindowManager;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -31,18 +30,17 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * author : Android 轮子哥
- * github : https://github.com/getActivity/XXPermissions
- * time   : 2018/06/15
- * desc   : 权限相关工具类
+ *    author : Android 轮子哥
+ *    github : https://github.com/getActivity/XXPermissions
+ *    time   : 2018/06/15
+ *    desc   : 权限相关工具类
  */
 final class PermissionUtils {
 
-    /**
-     * Handler 对象
-     */
+    /** Handler 对象 */
     private static final Handler HANDLER = new Handler(Looper.getMainLooper());
 
     /**
@@ -75,7 +73,7 @@ final class PermissionUtils {
             return ((int) checkOpNoThrowMethod.invoke(appOps, opValue, uid, pkg)
                     == AppOpsManager.MODE_ALLOWED);
         } catch (ClassNotFoundException | NoSuchMethodException |
-                 InvocationTargetException | IllegalAccessException | RuntimeException e) {
+                InvocationTargetException | IllegalAccessException | RuntimeException e) {
             return true;
         }
     }
@@ -98,8 +96,8 @@ final class PermissionUtils {
     /**
      * 解决 Android 12 调用 shouldShowRequestPermissionRationale 出现内存泄漏的问题
      * Android 12L 和 Android 13 版本经过测试不会出现这个问题，证明 Google 在新版本上已经修复了这个问题
-     * 但是对于 Android 12 仍是一个历史遗留问题，这是我们所有应用开发者不得不面对的一个事情
-     * <p>
+     * 但是对于 Android 12 仍是一个历史遗留问题，这是我们所有 Android App 开发者不得不面对的一个事情
+     *
      * issues 地址：https://github.com/getActivity/XXPermissions/issues/133
      */
     @RequiresApi(api = AndroidVersion.ANDROID_6)
@@ -135,15 +133,13 @@ final class PermissionUtils {
             } else {
                 delayMillis = 500;
             }
-        } else if (PhoneRomUtils.isMiui()) {
-            // 经过测试，发现小米 Android 11 及以上的版本，申请这个权限需要 1 秒钟才能判断到
+        } else if (PhoneRomUtils.isMiui() && AndroidVersion.isAndroid11() &&
+            PermissionUtils.containsPermission(permissions, Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+            // 经过测试，发现小米 Android 11 及以上的版本，申请这个权限需要 1000 毫秒才能判断到（测试了 800 毫秒还不行）
             // 因为在 Android 10 的时候，这个特殊权限弹出的页面小米还是用谷歌原生的
             // 然而在 Android 11 之后的，这个权限页面被小米改成了自己定制化的页面
             // 测试了原生的模拟器和 vivo 云测并发现没有这个问题，所以断定这个 Bug 就是小米特有的
-            if (AndroidVersion.isAndroid11() &&
-                    PermissionUtils.containsPermission(permissions, Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
-                delayMillis = 1000;
-            }
+            delayMillis = 1000;
         }
         postDelayed(runnable, delayMillis);
     }
@@ -179,9 +175,7 @@ final class PermissionUtils {
                     androidManifestInfo.packageName)) {
                 return null;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XmlPullParserException e) {
+        } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         }
 
@@ -212,14 +206,14 @@ final class PermissionUtils {
             // 这是因为用户授权部分图片或者视频的时候，READ_MEDIA_VISUAL_USER_SELECTED 权限状态是授予的
             // 但是 READ_MEDIA_IMAGES 和 READ_MEDIA_VIDEO 的权限状态是拒绝的
             if (AndroidVersion.isAndroid14() &&
-                    (PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_IMAGES) ||
-                            PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_VIDEO))) {
+                (PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_IMAGES) ||
+                PermissionUtils.equalsPermission(permission, Permission.READ_MEDIA_VIDEO))) {
                 grantResults[i] = PermissionApi.getPermissionResult(activity, permission);
                 continue;
             }
 
             if (AndroidVersion.isAndroid13() && AndroidVersion.getTargetSdkVersionCode(activity) >= AndroidVersion.ANDROID_13 &&
-                    PermissionUtils.equalsPermission(permission, Permission.WRITE_EXTERNAL_STORAGE)) {
+                PermissionUtils.equalsPermission(permission, Permission.WRITE_EXTERNAL_STORAGE)) {
                 // 在 Android 13 不能申请 WRITE_EXTERNAL_STORAGE，会被系统直接拒绝，在这里需要重新检查权限的状态
                 grantResults[i] = PermissionApi.getPermissionResult(activity, permission);
                 continue;
@@ -234,7 +228,7 @@ final class PermissionUtils {
 
     /**
      * 将数组转换成 ArrayList
-     * <p>
+     *
      * 这里解释一下为什么不用 Arrays.asList
      * 第一是返回的类型不是 java.util.ArrayList 而是 java.util.Arrays.ArrayList
      * 第二是返回的 ArrayList 对象是只读的，也就是不能添加任何元素，否则会抛异常
@@ -260,7 +254,7 @@ final class PermissionUtils {
     @NonNull
     static <T> ArrayList<T> asArrayLists(@Nullable T[]... arrays) {
         ArrayList<T> list = new ArrayList<>();
-        if (arrays == null) {
+        if (arrays == null || arrays.length == 0) {
             return list;
         }
         for (T[] ts : arrays) {
@@ -349,9 +343,9 @@ final class PermissionUtils {
         try {
             String metaKey = "ScopedStorage";
             Bundle metaData = context.getPackageManager().getApplicationInfo(
-                    context.getPackageName(), PackageManager.GET_META_DATA).metaData;
+                context.getPackageName(), PackageManager.GET_META_DATA).metaData;
             if (metaData != null && metaData.containsKey(metaKey)) {
-                return Boolean.parseBoolean(String.valueOf(metaData.get(metaKey)));
+                return metaData.getBoolean(metaKey);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -368,16 +362,18 @@ final class PermissionUtils {
             // 兼容问题：在 Android 8.0 的手机上可以固定 Activity 的方向，但是这个 Activity 不能是透明的，否则就会抛出异常
             // 复现场景：只需要给 Activity 主题设置 <item name="android:windowIsTranslucent">true</item> 属性即可
             switch (activity.getResources().getConfiguration().orientation) {
-                case Configuration.ORIENTATION_LANDSCAPE ->
-                        activity.setRequestedOrientation(PermissionUtils.isActivityReverse(activity) ?
-                                ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
-                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                case Configuration.ORIENTATION_PORTRAIT ->
-                        activity.setRequestedOrientation(PermissionUtils.isActivityReverse(activity) ?
-                                ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT :
-                                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                default -> {
-                }
+                case Configuration.ORIENTATION_LANDSCAPE:
+                    activity.setRequestedOrientation(PermissionUtils.isActivityReverse(activity) ?
+                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
+                            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    break;
+                case Configuration.ORIENTATION_PORTRAIT:
+                    activity.setRequestedOrientation(PermissionUtils.isActivityReverse(activity) ?
+                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT :
+                            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    break;
+                default:
+                    break;
             }
         } catch (IllegalStateException e) {
             // java.lang.IllegalStateException: Only fullscreen activities can request orientation
@@ -389,17 +385,31 @@ final class PermissionUtils {
      * 判断 Activity 是否反方向旋转了
      */
     static boolean isActivityReverse(@NonNull Activity activity) {
-        // 获取 Activity 旋转的角度
-        int activityRotation;
+        Display display = null;
         if (AndroidVersion.isAndroid11()) {
-            activityRotation = activity.getDisplay().getRotation();
+            display = activity.getDisplay();
         } else {
-            activityRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+            WindowManager windowManager = activity.getWindowManager();
+            if (windowManager != null) {
+                display = windowManager.getDefaultDisplay();
+            }
         }
-        return switch (activityRotation) {
-            case Surface.ROTATION_180, Surface.ROTATION_270 -> true;
-            default -> false;
-        };
+
+        if (display == null) {
+            return false;
+        }
+
+        // 获取 Activity 旋转的角度
+        int activityRotation = display.getRotation();
+        switch (activityRotation) {
+            case Surface.ROTATION_180:
+            case Surface.ROTATION_270:
+                return true;
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_90:
+            default:
+                return false;
+        }
     }
 
     /**
@@ -423,7 +433,7 @@ final class PermissionUtils {
     /**
      * 根据传入的权限自动选择最合适的权限设置页
      *
-     * @param permissions 请求失败的权限
+     * @param permissions                 请求失败的权限
      */
     static Intent getSmartPermissionIntent(@NonNull Context context, @Nullable List<String> permissions) {
         // 如果失败的权限里面不包含特殊权限
@@ -441,27 +451,26 @@ final class PermissionUtils {
 
         // 特殊权限统一处理
         switch (permissions.size()) {
-            case 1 -> {
+            case 1:
                 // 如果当前只有一个权限被拒绝了
                 return PermissionApi.getPermissionIntent(context, permissions.get(0));
-            }
-            case 2 -> {
+            case 2:
                 if (!AndroidVersion.isAndroid13() &&
                         PermissionUtils.containsPermission(permissions, Permission.NOTIFICATION_SERVICE) &&
                         PermissionUtils.containsPermission(permissions, Permission.POST_NOTIFICATIONS)) {
                     return PermissionApi.getPermissionIntent(context, Permission.NOTIFICATION_SERVICE);
                 }
-            }
-            case 3 -> {
+                break;
+            case 3:
                 if (AndroidVersion.isAndroid11() &&
                         PermissionUtils.containsPermission(permissions, Permission.MANAGE_EXTERNAL_STORAGE) &&
                         PermissionUtils.containsPermission(permissions, Permission.READ_EXTERNAL_STORAGE) &&
                         PermissionUtils.containsPermission(permissions, Permission.WRITE_EXTERNAL_STORAGE)) {
                     return PermissionApi.getPermissionIntent(context, Permission.MANAGE_EXTERNAL_STORAGE);
                 }
-            }
-            default -> {
-            }
+                break;
+            default:
+                break;
         }
         return PermissionIntentManager.getApplicationDetailsIntent(context);
     }

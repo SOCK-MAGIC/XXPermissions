@@ -16,17 +16,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.view.View;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
+import android.view.View;
+import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.toast.Toaster;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -78,15 +78,19 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
         if (viewId == R.id.btn_main_request_single_permission) {
 
             XXPermissions.with(this)
-                    .permission(Permission.CAMERA)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
+                .permission(Permission.CAMERA)
+                .interceptor(new PermissionInterceptor())
+                .request(new OnPermissionCallback() {
+
+                    @Override
+                    public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
                         if (!allGranted) {
                             return;
                         }
                         toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                    });
+                            PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                    }
+                });
 
         } else if (viewId == R.id.btn_main_request_group_permission) {
 
@@ -94,12 +98,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                     .permission(Permission.RECORD_AUDIO)
                     .permission(Permission.Group.CALENDAR)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_location_permission) {
@@ -110,12 +118,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                     // 如果不需要在后台使用定位功能，请不要申请此权限
                     .permission(Permission.ACCESS_BACKGROUND_LOCATION)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_sensors_permission) {
@@ -124,12 +136,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                     .permission(Permission.BODY_SENSORS)
                     .permission(Permission.BODY_SENSORS_BACKGROUND)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_activity_recognition_permission) {
@@ -137,13 +153,17 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.ACTIVITY_RECOGNITION)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                            addCountStepListener();
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                        addCountStepListener();
                     });
 
         } else if (viewId == R.id.btn_main_request_bluetooth_permission) {
@@ -154,18 +174,28 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 toast(getString(R.string.demo_android_12_bluetooth_permission_hint));
             }
 
-            view.postDelayed(() -> XXPermissions.with(MainActivity.this)
-                    .permission(Permission.BLUETOOTH_SCAN)
-                    .permission(Permission.BLUETOOTH_CONNECT)
-                    .permission(Permission.BLUETOOTH_ADVERTISE)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                    }), delayMillis);
+            view.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    XXPermissions.with(MainActivity.this)
+                            .permission(Permission.BLUETOOTH_SCAN)
+                            .permission(Permission.BLUETOOTH_CONNECT)
+                            .permission(Permission.BLUETOOTH_ADVERTISE)
+                            .interceptor(new PermissionInterceptor())
+                            .request(new OnPermissionCallback() {
+
+                                @Override
+                                public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                                    if (!allGranted) {
+                                        return;
+                                    }
+                                    toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                }
+                            });
+                }
+            }, delayMillis);
 
         } else if (viewId == R.id.btn_main_request_wifi_devices_permission) {
 
@@ -175,16 +205,26 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 toast(getString(R.string.demo_android_13_wifi_permission_hint));
             }
 
-            view.postDelayed(() -> XXPermissions.with(MainActivity.this)
-                    .permission(Permission.NEARBY_WIFI_DEVICES)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                    }), delayMillis);
+            view.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    XXPermissions.with(MainActivity.this)
+                            .permission(Permission.NEARBY_WIFI_DEVICES)
+                            .interceptor(new PermissionInterceptor())
+                            .request(new OnPermissionCallback() {
+
+                                @Override
+                                public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                                    if (!allGranted) {
+                                        return;
+                                    }
+                                    toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                }
+                            });
+                }
+            }, delayMillis);
 
         } else if (viewId == R.id.btn_main_request_read_media_location_permission) {
 
@@ -194,21 +234,36 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 toast(getString(R.string.demo_android_10_read_media_location_permission_hint));
             }
 
-            view.postDelayed(() -> XXPermissions.with(MainActivity.this)
-                    // Permission.READ_EXTERNAL_STORAGE 和 Permission.MANAGE_EXTERNAL_STORAGE 二选一
-                    // 如果 targetSdk >= 33，则添加 Permission.READ_MEDIA_IMAGES 和 Permission.MANAGE_EXTERNAL_STORAGE 二选一
-                    // 如果 targetSdk < 33，则添加 Permission.READ_EXTERNAL_STORAGE 和 Permission.MANAGE_EXTERNAL_STORAGE 二选一
-                    .permission(Permission.READ_MEDIA_IMAGES)
-                    .permission(Permission.ACCESS_MEDIA_LOCATION)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                        new Thread(this::getAllImagesFromGallery).start();
-                    }), delayMillis);
+            view.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    XXPermissions.with(MainActivity.this)
+                            // Permission.READ_EXTERNAL_STORAGE 和 Permission.MANAGE_EXTERNAL_STORAGE 二选一
+                            // 如果 targetSdk >= 33，则添加 Permission.READ_MEDIA_IMAGES 和 Permission.MANAGE_EXTERNAL_STORAGE 二选一
+                            // 如果 targetSdk < 33，则添加 Permission.READ_EXTERNAL_STORAGE 和 Permission.MANAGE_EXTERNAL_STORAGE 二选一
+                            .permission(Permission.READ_MEDIA_IMAGES)
+                            .permission(Permission.ACCESS_MEDIA_LOCATION)
+                            .interceptor(new PermissionInterceptor())
+                            .request(new OnPermissionCallback() {
+
+                                @Override
+                                public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                                    if (!allGranted) {
+                                        return;
+                                    }
+                                    toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getAllImagesFromGallery();
+                                        }
+                                    }).start();
+                                }
+                            });
+                }
+            }, delayMillis);
 
         } else if (viewId == R.id.btn_main_request_read_media_permission) {
 
@@ -218,22 +273,32 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 toast(getString(R.string.demo_android_13_read_media_permission_hint));
             }
 
-            view.postDelayed(() -> XXPermissions.with(MainActivity.this)
-                    // 不适配分区存储应该这样写
-                    //.permission(Permission.MANAGE_EXTERNAL_STORAGE)
-                    // 适配分区存储应该这样写
-                    .permission(Permission.READ_MEDIA_IMAGES)
-                    .permission(Permission.READ_MEDIA_VIDEO)
-                    .permission(Permission.READ_MEDIA_AUDIO)
-                    .permission(Permission.READ_MEDIA_VISUAL_USER_SELECTED)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                    }), delayMillis);
+            view.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    XXPermissions.with(MainActivity.this)
+                            // 不适配分区存储应该这样写
+                            //.permission(Permission.MANAGE_EXTERNAL_STORAGE)
+                            // 适配分区存储应该这样写
+                            .permission(Permission.READ_MEDIA_IMAGES)
+                            .permission(Permission.READ_MEDIA_VIDEO)
+                            .permission(Permission.READ_MEDIA_AUDIO)
+                            .permission(Permission.READ_MEDIA_VISUAL_USER_SELECTED)
+                            .interceptor(new PermissionInterceptor())
+                            .request(new OnPermissionCallback() {
+
+                                @Override
+                                public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                                    if (!allGranted) {
+                                        return;
+                                    }
+                                    toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                }
+                            });
+                }
+            }, delayMillis);
 
         } else if (viewId == R.id.btn_main_request_manage_storage_permission) {
 
@@ -243,31 +308,45 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 toast(getString(R.string.demo_android_11_manage_storage_permission_hint));
             }
 
-            view.postDelayed(() -> XXPermissions.with(MainActivity.this)
-                    // 适配分区存储应该这样写
-                    //.permission(Permission.Group.STORAGE)
-                    // 不适配分区存储应该这样写
-                    .permission(Permission.MANAGE_EXTERNAL_STORAGE)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                    }), delayMillis);
+            view.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    XXPermissions.with(MainActivity.this)
+                            // 适配分区存储应该这样写
+                            //.permission(Permission.Group.STORAGE)
+                            // 不适配分区存储应该这样写
+                            .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+                            .interceptor(new PermissionInterceptor())
+                            .request(new OnPermissionCallback() {
+
+                                @Override
+                                public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                                    if (!allGranted) {
+                                        return;
+                                    }
+                                    toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                }
+                            });
+                }
+            }, delayMillis);
 
         } else if (viewId == R.id.btn_main_request_install_packages_permission) {
 
             XXPermissions.with(this)
                     .permission(Permission.REQUEST_INSTALL_PACKAGES)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_system_alert_window_permission) {
@@ -275,12 +354,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.SYSTEM_ALERT_WINDOW)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_write_settings_permission) {
@@ -288,12 +371,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.WRITE_SETTINGS)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_notification_service_permission) {
@@ -301,12 +388,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.NOTIFICATION_SERVICE)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_post_notification) {
@@ -317,30 +408,44 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 toast(getString(R.string.demo_android_13_post_notification_permission_hint));
             }
 
-            view.postDelayed(() -> XXPermissions.with(MainActivity.this)
-                    .permission(Permission.POST_NOTIFICATIONS)
-                    .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                    }), delayMillis);
+            view.postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    XXPermissions.with(MainActivity.this)
+                            .permission(Permission.POST_NOTIFICATIONS)
+                            .interceptor(new PermissionInterceptor())
+                            .request(new OnPermissionCallback() {
+
+                                @Override
+                                public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                                    if (!allGranted) {
+                                        return;
+                                    }
+                                    toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                }
+                            });
+                }
+            }, delayMillis);
 
         } else if (viewId == R.id.btn_main_request_bind_notification_listener_permission) {
 
             XXPermissions.with(this)
                     .permission(Permission.BIND_NOTIFICATION_LISTENER_SERVICE)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
-                        }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                            toggleNotificationListenerService();
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                                toggleNotificationListenerService();
+                            }
                         }
                     });
 
@@ -349,12 +454,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.PACKAGE_USAGE_STATS)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_schedule_exact_alarm_permission) {
@@ -362,12 +471,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.SCHEDULE_EXACT_ALARM)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_access_notification_policy_permission) {
@@ -375,12 +488,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.ACCESS_NOTIFICATION_POLICY)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_ignore_battery_optimizations_permission) {
@@ -388,12 +505,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_picture_in_picture_permission) {
@@ -401,12 +522,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.PICTURE_IN_PICTURE)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_bind_vpn_service_permission) {
@@ -414,12 +539,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.BIND_VPN_SERVICE)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
                     });
 
         } else if (viewId == R.id.btn_main_request_get_installed_apps_permission) {
@@ -427,13 +556,17 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             XXPermissions.with(this)
                     .permission(Permission.GET_INSTALLED_APPS)
                     .interceptor(new PermissionInterceptor())
-                    .request((permissions, allGranted) -> {
-                        if (!allGranted) {
-                            return;
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                            if (!allGranted) {
+                                return;
+                            }
+                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                            getAppList();
                         }
-                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
-                        getAppList();
                     });
 
         } else if (viewId == R.id.btn_main_start_permission_activity) {
@@ -539,7 +672,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses != null) {
                 Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder();
+                StringBuilder strReturnedAddress = new StringBuilder("");
 
                 for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
                     strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
@@ -561,15 +694,16 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
         public void onSensorChanged(SensorEvent event) {
             Log.w("onSensorChanged", "event = " + event);
             switch (event.sensor.getType()) {
-                case Sensor.TYPE_STEP_COUNTER ->
-                        Log.w("XXPermissions", "开机以来当天总步数：" + event.values[0]);
-                case Sensor.TYPE_STEP_DETECTOR -> {
+                case Sensor.TYPE_STEP_COUNTER:
+                    Log.w("XXPermissions", "开机以来当天总步数：" + event.values[0]);
+                    break;
+                case Sensor.TYPE_STEP_DETECTOR:
                     if (event.values[0] == 1) {
                         Log.w("XXPermissions", "当前走了一步");
                     }
-                }
-                default -> {
-                }
+                    break;
+                default:
+                    break;
             }
         }
 

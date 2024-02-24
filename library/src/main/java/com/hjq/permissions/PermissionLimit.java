@@ -1,6 +1,5 @@
 package com.hjq.permissions;
 
-
 import androidx.annotation.StringDef;
 
 import java.lang.annotation.Retention;

@@ -3,15 +3,14 @@ package com.hjq.permissions;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 /**
- * author : Android 轮子哥
- * github : https://github.com/getActivity/XXPermissions
- * time   : 2023/03/11
- * desc   : Android 4.4 权限委托实现
+ *    author : Android 轮子哥
+ *    github : https://github.com/getActivity/XXPermissions
+ *    time   : 2023/03/11
+ *    desc   : Android 4.4 权限委托实现
  */
 @RequiresApi(api = AndroidVersion.ANDROID_4_4)
 class PermissionDelegateImplV19 extends PermissionDelegateImplV18 {

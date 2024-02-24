@@ -87,6 +87,7 @@ final class GetInstalledAppsPermissionCompat {
      * 判断是否支持获取应用列表权限
      */
     @RequiresApi(api = AndroidVersion.ANDROID_6)
+    @SuppressWarnings("deprecation")
     private static boolean isSupportGetInstalledAppsPermission(Context context) {
         try {
             PermissionInfo permissionInfo = context.getPackageManager().getPermissionInfo(Permission.GET_INSTALLED_APPS, 0);
