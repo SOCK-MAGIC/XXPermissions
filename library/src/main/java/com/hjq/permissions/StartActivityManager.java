@@ -1,7 +1,6 @@
 package com.hjq.permissions;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
@@ -73,10 +72,6 @@ final class StartActivityManager {
       return startActivityForResult(new StartActivityDelegateActivityImpl(activity), intent, requestCode);
    }
 
-   static boolean startActivityForResult(@NonNull Fragment fragment, @NonNull Intent intent, int requestCode) {
-      return startActivityForResult(new StartActivityDelegateFragmentImpl(fragment), intent, requestCode);
-   }
-
    static boolean startActivityForResult(@NonNull StartActivityDelegate delegate, @NonNull Intent intent, int requestCode) {
       try {
          delegate.startActivityForResult(intent, requestCode);
@@ -140,24 +135,4 @@ final class StartActivityManager {
          mActivity.startActivityForResult(intent, requestCode);
       }
    }
-
-   private static class StartActivityDelegateFragmentImpl implements StartActivityDelegate {
-
-      private final Fragment mFragment;
-
-      private StartActivityDelegateFragmentImpl(@NonNull Fragment fragment) {
-         mFragment = fragment;
-      }
-
-      @Override
-      public void startActivity(@NonNull Intent intent) {
-         mFragment.startActivity(intent);
-      }
-
-      @Override
-      public void startActivityForResult(@NonNull Intent intent, int requestCode) {
-         mFragment.startActivityForResult(intent, requestCode);
-      }
-   }
-
 }

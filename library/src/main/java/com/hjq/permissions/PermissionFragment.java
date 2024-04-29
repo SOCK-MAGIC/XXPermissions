@@ -224,8 +224,11 @@ public final class PermissionFragment extends Fragment implements Runnable {
                 continue;
             }
             // 跳转到特殊权限授权页面
-            StartActivityManager.startActivityForResult(this, PermissionUtils.getSmartPermissionIntent(activity,
-                    PermissionUtils.asArrayList(permission)), getArguments().getInt(REQUEST_CODE));
+            StartActivityManager.startActivityForResult(
+                    activity,
+                    PermissionUtils.getSmartPermissionIntent(activity, PermissionUtils.asArrayList(permission)),
+                    getArguments().getInt(REQUEST_CODE)
+            );
             requestSpecialPermission = true;
         }
 

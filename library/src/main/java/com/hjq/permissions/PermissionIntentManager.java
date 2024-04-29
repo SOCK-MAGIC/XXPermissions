@@ -4,29 +4,41 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *    author : Android 轮子哥
- *    github : https://github.com/getActivity/XXPermissions
- *    time   : 2023/03/12
- *    desc   : 国内手机厂商权限设置页管理器
+ * author : Android 轮子哥
+ * github : https://github.com/getActivity/XXPermissions
+ * time   : 2023/03/12
+ * desc   : 国内手机厂商权限设置页管理器
  */
 final class PermissionIntentManager {
 
-    /** 华为手机管家 App 包名 */
+    /**
+     * 华为手机管家 App 包名
+     */
     private static final String EMUI_MOBILE_MANAGER_APP_PACKAGE_NAME = "com.huawei.systemmanager";
 
-    /** 小米手机管家 App 包名 */
+    /**
+     * 小米手机管家 App 包名
+     */
     private static final String MIUI_MOBILE_MANAGER_APP_PACKAGE_NAME = "com.miui.securitycenter";
 
-    /** OPPO 安全中心 App 包名 */
+    /**
+     * OPPO 安全中心 App 包名
+     */
     private static final String COLOR_OS_SAFE_CENTER_APP_PACKAGE_NAME_1 = "com.oppo.safe";
     private static final String COLOR_OS_SAFE_CENTER_APP_PACKAGE_NAME_2 = "com.color.safecenter";
     private static final String COLOR_OS_SAFE_CENTER_APP_PACKAGE_NAME_3 = "com.oplus.safecenter";
 
-    /** vivo 安全中心 App 包名 */
+    /**
+     * vivo 安全中心 App 包名
+     */
     private static final String ORIGIN_OS_MOBILE_MANAGER_APP_PACKAGE_NAME = "com.iqoo.secure";
 
     /**
@@ -129,7 +141,8 @@ final class PermissionIntentManager {
         }
 
         if (PermissionUtils.areActivityIntent(context, oppoSafeCenterAppIntent)) {
-            intent = StartActivityManager.addSubIntentToMainIntent(intent, oppoSafeCenterAppIntent);;
+            intent = StartActivityManager.addSubIntentToMainIntent(intent, oppoSafeCenterAppIntent);
+            ;
         }
 
         return intent;
@@ -276,13 +289,28 @@ final class PermissionIntentManager {
 
     /* ---------------------------------------------------------------------------------------- */
 
+    @NonNull
+    static Intent getApplicationDetailsIntent(@NonNull Context context) {
+        return getApplicationDetailsIntent(context, null);
+    }
+
     /**
      * 获取应用详情界面意图
      */
     @NonNull
-    static Intent getApplicationDetailsIntent(@NonNull Context context) {
+    static Intent getApplicationDetailsIntent(@NonNull Context context, @Nullable List<String> permissions) {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(PermissionUtils.getPackageNameUri(context));
+        if (permissions != null && !permissions.isEmpty() && PhoneRomUtils.isColorOs()) {
+            // OPPO 应用权限受阻跳转优化适配：https://open.oppomobile.com/new/developmentDoc/info?id=12983
+            Bundle bundle = new Bundle();
+            // 元素为受阻权限的原生权限名字符串常量
+            bundle.putStringArrayList("permissionList", permissions instanceof ArrayList ?
+                    (ArrayList<String>) permissions : new ArrayList<>(permissions));
+            intent.putExtras(bundle);
+            // 传入跳转优化标识
+            intent.putExtra("isGetPermission", true);
+        }
         if (PermissionUtils.areActivityIntent(context, intent)) {
             return intent;
         }
@@ -299,7 +327,9 @@ final class PermissionIntentManager {
         return getAndroidSettingAppIntent();
     }
 
-    /** 跳转到系统设置页面 */
+    /**
+     * 跳转到系统设置页面
+     */
     @NonNull
     static Intent getAndroidSettingAppIntent() {
         return new Intent(Settings.ACTION_SETTINGS);

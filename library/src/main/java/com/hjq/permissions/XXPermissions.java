@@ -1,7 +1,6 @@
 package com.hjq.permissions;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 
@@ -36,10 +35,6 @@ public final class XXPermissions {
      */
     public static XXPermissions with(@NonNull Context context) {
         return new XXPermissions(context);
-    }
-
-    public static XXPermissions with(@NonNull Fragment fragment) {
-        return with(fragment.getActivity());
     }
 
     /**
@@ -392,27 +387,5 @@ public final class XXPermissions {
                                                int requestCode) {
         Intent intent = PermissionUtils.getSmartPermissionIntent(activity, permissions);
         StartActivityManager.startActivityForResult(activity, intent, requestCode);
-    }
-
-    public static void startPermissionActivity(@NonNull Activity activity,
-                                               @NonNull String permission,
-                                               @Nullable OnPermissionPageCallback callback) {
-        startPermissionActivity(activity, PermissionUtils.asArrayList(permission), callback);
-    }
-
-    public static void startPermissionActivity(@NonNull Activity activity,
-                                               @NonNull String[] permissions,
-                                               @Nullable OnPermissionPageCallback callback) {
-        startPermissionActivity(activity, PermissionUtils.asArrayLists(permissions), callback);
-    }
-
-    public static void startPermissionActivity(@NonNull Activity activity,
-                                               @NonNull List<String> permissions,
-                                               @Nullable OnPermissionPageCallback callback) {
-        if (permissions.isEmpty()) {
-            StartActivityManager.startActivity(activity, PermissionIntentManager.getApplicationDetailsIntent(activity));
-            return;
-        }
-        PermissionPageFragment.launch(activity, permissions, callback);
     }
 }
